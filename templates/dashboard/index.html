@@ -1,0 +1,219 @@
+{% extends 'base.html' %}
+
+{% block page_title %}Dashboard{% endblock %}
+
+{% block page_actions %}
+<div class="btn-group" role="group">
+    <a href="{% url 'events:create' %}" class="btn btn-primary">
+        <i class="fas fa-plus me-1"></i> New Event
+    </a>
+    <a href="{% url 'templates:upload' %}" class="btn btn-outline-primary">
+        <i class="fas fa-upload me-1"></i> Upload Template
+    </a>
+</div>
+{% endblock %}
+
+{% block content %}
+<!-- Stats Cards -->
+<div class="row mb-4">
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card stat-card">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-uppercase mb-1">Total Events</div>
+                        <div class="h5 mb-0 font-weight-bold">{{ total_events }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-calendar-alt fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card stat-card success">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-uppercase mb-1">Recipients</div>
+                        <div class="h5 mb-0 font-weight-bold">{{ total_recipients }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-users fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card stat-card warning">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-uppercase mb-1">Templates</div>
+                        <div class="h5 mb-0 font-weight-bold">{{ total_templates }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-images fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card stat-card info">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-uppercase mb-1">Messages Sent</div>
+                        <div class="h5 mb-0 font-weight-bold">{{ total_notifications_sent }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-paper-plane fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Upcoming Events -->
+    <div class="col-lg-8 mb-4">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="fas fa-calendar-check me-2"></i> Upcoming Events
+                </h5>
+                <a href="{% url 'events:list' %}" class="btn btn-sm btn-outline-primary">View All</a>
+            </div>
+            <div class="card-body">
+                {% if upcoming_events %}
+                    <div class="list-group list-group-flush">
+                        {% for event in upcoming_events %}
+                        <div class="list-group-item d-flex justify-content-between align-items-start">
+                            <div class="ms-2 me-auto">
+                                <div class="fw-bold">{{ event.title }}</div>
+                                <small class="text-muted">
+                                    {{ event.recipient.get_full_name }} • {{ event.event_date|date:"M d, Y" }}
+                                </small>
+                            </div>
+                            <span class="badge bg-primary rounded-pill">{{ event.event_type.name }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-calendar fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">No upcoming events scheduled.</p>
+                        <a href="{% url 'events:create' %}" class="btn btn-primary">Schedule Your First Event</a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Quick Stats -->
+    <div class="col-lg-4 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-chart-line me-2"></i> This Month
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-6 border-end">
+                        <div class="h4 text-primary">{{ events_this_month }}</div>
+                        <small class="text-muted">Events Created</small>
+                    </div>
+                    <div class="col-6">
+                        <div class="h4 text-success">{{ notifications_this_month }}</div>
+                        <small class="text-muted">Messages Sent</small>
+                    </div>
+                </div>
+                
+                <hr>
+                
+                <div class="d-grid gap-2">
+                    <a href="{% url 'events:analytics' %}" class="btn btn-outline-primary btn-sm">
+                        View Detailed Analytics
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Quick Actions -->
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-bolt me-2"></i> Quick Actions
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{% url 'events:create' %}" class="btn btn-primary btn-sm">
+                        <i class="fas fa-plus me-1"></i> Create Event
+                    </a>
+                    <a href="{% url 'events:recipients' %}" class="btn btn-outline-primary btn-sm">
+                        <i class="fas fa-user-plus me-1"></i> Add Recipient
+                    </a>
+                    <a href="{% url 'templates:upload' %}" class="btn btn-outline-primary btn-sm">
+                        <i class="fas fa-upload me-1"></i> Upload Template
+                    </a>
+                    <a href="{% url 'events:bulk_import' %}" class="btn btn-outline-secondary btn-sm">
+                        <i class="fas fa-file-import me-1"></i> Bulk Import
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Activity -->
+{% if recent_activity %}
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="fas fa-history me-2"></i> Recent Activity
+                </h5>
+                <a href="{% url 'dashboard:activity' %}" class="btn btn-sm btn-outline-primary">View All</a>
+            </div>
+            <div class="card-body">
+                <div class="timeline">
+                    {% for activity in recent_activity %}
+                    <div class="d-flex mb-3">
+                        <div class="flex-shrink-0 me-3">
+                            <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center" 
+                                 style="width: 40px; height: 40px;">
+                                <i class="fas fa-circle text-white" style="font-size: 8px;"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1">
+                            <div class="fw-bold">{{ activity.description }}</div>
+                            <small class="text-muted">{{ activity.created_at|timesince }} ago</small>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Auto-refresh dashboard every 5 minutes
+    setTimeout(function() {
+        location.reload();
+    }, 300000);
+</script>
+{% endblock %}
