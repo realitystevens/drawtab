@@ -1,0 +1,2 @@
+# No additional requirements needed for basic email sending
+# The Python standard library includes smtplib and email modules
