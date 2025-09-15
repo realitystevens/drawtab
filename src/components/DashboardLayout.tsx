@@ -1,8 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { useAuth } from '@/contexts/AuthContext'
+import { useRouter, usePathname } from 'next/navigation'
 import { 
   HomeIcon, 
   DocumentIcon, 
@@ -39,7 +40,31 @@ interface DashboardLayoutProps {
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [menuOpen, setMenuOpen] = useState(false) 
+  const menuRef = useRef<HTMLDivElement>(null)
+  const { user, logout } = useAuth()
+  const router = useRouter()
   const pathname = usePathname()
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setMenuOpen(false)
+      }
+    }
+    if (menuOpen) {
+      document.addEventListener('mousedown', handleClickOutside)
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [menuOpen])
+
+  const handleSignOut = async () => {
+    await logout()
+    router.push('/auth/login')
+  }
 
   return (
     <div className="h-screen flex overflow-hidden bg-gray-100">
@@ -144,18 +169,45 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             <div className="flex-1 flex">
               {/* Search can go here */}
             </div>
+          
+             
             <div className="ml-4 flex items-center md:ml-6">
-              {/* User menu */}
-              <div className="ml-3 relative">
-                <Link
-                  href="/account/profile"
+              <div className="ml-3 relative" ref={menuRef}>
+                <button
+                  type="button"
                   className="max-w-xs bg-white flex items-center text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                  onClick={() => setMenuOpen((open) => !open)}
                 >
                   <UserCircleIcon className="h-8 w-8 text-gray-400" />
-                  <span className="ml-2 text-gray-700 font-medium">Profile</span>
-                </Link>
+                  <span className="ml-2 text-gray-700 font-medium">{user?.name ?? ''}</span>
+                </button>
+                {menuOpen && (
+                  <div className="absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50">
+                    <div className="py-3 px-4 border-b">
+                      <div className="text-sm font-medium text-gray-900">{user?.name}</div>
+                      <div className="text-xs text-gray-500">{user?.email}</div>
+                    </div>
+                    <div className="py-1">
+                      <Link
+                        href="/account/profile"
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        onClick={() => setMenuOpen(false)}
+                      >
+                        Account
+                      </Link>
+                      <button
+                        onClick={handleSignOut}
+                        className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+                      >
+                        Sign out
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
+
+
           </div>
         </div>
 
