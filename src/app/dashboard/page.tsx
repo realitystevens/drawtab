@@ -1,4 +1,8 @@
-import { Metadata } from 'next'
+'use client'
+
+import { useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+import { useAuth } from '@/contexts/AuthContext'
 import { 
   ChartBarIcon, 
   DocumentIcon, 
@@ -6,10 +10,6 @@ import {
   CalendarIcon 
 } from '@heroicons/react/24/outline'
 
-export const metadata: Metadata = {
-  title: 'Dashboard | Drawtab',
-  description: 'Manage your automated flyer campaigns and view analytics.',
-}
 
 const stats = [
   { name: 'Total Templates', value: '12', icon: DocumentIcon },
@@ -70,6 +70,23 @@ const upcomingEvents = [
 ]
 
 export default function DashboardPage() {
+  const { user, loading } = useAuth()
+  const router = useRouter()
+
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push('/auth/login')
+    }
+  }, [user, loading, router])
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <span className="text-lg text-gray-600">Loading...</span>
+      </div>
+    )
+  }
+  
   return (
     <div className="py-6">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
