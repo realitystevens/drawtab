@@ -35,20 +35,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   const login = async (email: string, password: string) => {
+    setLoading(true)
     try {
       await account.createEmailSession(email, password)
       const currentUser = await account.get()
       setUser(currentUser)
     } catch (error) {
+      setUser(null)
       throw error
+    } finally {
+      setLoading(false)
     }
   }
 
   const register = async (email: string, password: string, name: string) => {
     try {
       await account.create('unique()', email, password, name)
-      await login(email, password)
+      try {
+        await login(email, password)
+      } catch (loginError) {
+        setUser(null)
+        throw new Error('Registration successful, but login failed. Please try logging in manually <a href="/auth/login" class="underline text-primary-600">here</a>.')
+      }
     } catch (error) {
+      setUser(null)
       throw error
     }
   }
